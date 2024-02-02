@@ -2,13 +2,17 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
+from socketserver import ThreadingMixIn
+import threading
 from urllib.parse import urlparse, parse_qs
 from cgi import FieldStorage
 import tempfile
 from pdf2image import convert_from_path
 from PIL import Image, ImageOps
 import numpy as np
-
+import gc
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True  
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
@@ -152,11 +156,11 @@ def process_pdf_night_mode(filepath, output_path):
         processed_images.append(img_modified)
     
     processed_images[0].save(output_path, save_all=True, append_images=processed_images[1:])
-
-def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8000):
+    gc.collect()
+def run(server_class=ThreadedHTTPServer, handler_class=SimpleHTTPRequestHandler, port=8000):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print(f'Starting httpd on port {port}...')
+    print(f'Starting httpd on port {port} with thread: {threading.currentThread().getName()}')
     httpd.serve_forever()
 
 if __name__ == '__main__':
