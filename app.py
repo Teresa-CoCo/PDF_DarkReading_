@@ -39,17 +39,69 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(b'''
-            <html>
-            <head>
-                <title>Upload PDF for Night Mode Conversion</title>
-            </head>
-            <body>
-                <form enctype="multipart/form-data" method="post">
-                    <input name="file" type="file" />
-                    <input type="submit" value="Upload" />
-                </form>
-            </body>
-            </html>
+            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload PDF for Night Mode Conversion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="file"] {
+            border: 1px solid #ccc;
+            display: block;
+            padding: 6px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload PDF for Night Mode Conversion</h1>
+        <form enctype="multipart/form-data" method="post">
+            <input name="file" type="file" />
+            <input type="submit" value="Upload" />
+        </form>
+    </div>
+</body>
+</html>
+
         ''')
 
     def do_POST(self):
