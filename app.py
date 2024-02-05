@@ -32,6 +32,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                         self.wfile.write(file.read())
                     # 清理文件
                     os.remove(filename)
+                    # 回收内存
+                    gc.collect()
                     return
                 except Exception as e:
                     self.send_response(404)
