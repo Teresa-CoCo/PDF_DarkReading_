@@ -147,9 +147,9 @@ def process_pdf_night_mode(filepath, output_path):
         img_inverted = ImageOps.invert(img_gray)
         data = np.array(img_inverted)
         
-        low_gray_mask = data < 49
-        data[low_gray_mask] = 49
-        high_gray_mask = data > 240
+        low_gray_mask = data < 31
+        data[low_gray_mask] = 31
+        high_gray_mask = data >= 200
         data[high_gray_mask] = 240
         
         img_modified = Image.fromarray(data)
