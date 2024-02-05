@@ -12,7 +12,8 @@ COPY . /app
 # RUN pip install --no-cache-dir -r requirements.txt
 
 # 安装pdf2image, Pillow, numpy等依赖
-RUN pip install --no-cache-dir pdf2image Pillow numpy
+RUN pip install --no-cache-dir pdf2image Pillow numpy 
+RUN pip install --no-cache-dir --upgrade PyPDF2==2.10.0
 RUN apt update
 RUN apt-get install poppler-utils -y
 
