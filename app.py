@@ -139,7 +139,28 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"File is missing")
 
-def process_pdf_night_mode(filepath, output_path):
+from PyPDF2 import PdfFileReader, PdfFileWriter
+chunk_size = 200
+def split_pdf(filepath, chunk_size):
+    pdf = PdfFileReader(filepath)
+    total_pages = pdf.getNumPages()
+    print(total_pages)
+
+    for i in range(0, total_pages, chunk_size):
+        pdf_writer = PdfFileWriter()
+        for j in range(i, min(i + chunk_size, total_pages)):
+            pdf_writer.addPage(pdf.getPage(j))
+
+        output_filename = f'{filepath}_{i//chunk_size}.pdf'
+
+        with open(output_filename, 'wb') as out:
+            pdf_writer.write(out)
+
+        print(f'Created: {output_filename}')
+    
+    return total_pages
+
+def process_chunk(filepath):
     images = convert_from_path(filepath)
     processed_images = []
     for img in images:
@@ -155,8 +176,34 @@ def process_pdf_night_mode(filepath, output_path):
         img_modified = Image.fromarray(data)
         processed_images.append(img_modified)
     
-    processed_images[0].save(output_path, save_all=True, append_images=processed_images[1:])
+    return processed_images
+
+def merge_images(images, output_path):
+    images[0].save(output_path, save_all=True, append_images=images[1:])
+
+def process_pdf_night_mode(filepath, output_path):
+    # Split the PDF into chunks
+    total_pages = split_pdf(filepath, chunk_size)
+
+    # Process each chunk and collect all processed images
+    all_processed_images = []
+    for i in range(0, total_pages, chunk_size):
+        chunk_filepath = f'{filepath}_{i//chunk_size}.pdf'
+        processed_images = process_chunk(chunk_filepath)
+        all_processed_images.extend(processed_images)
+        print(f'Processed: {chunk_filepath}')
+
+    # Merge all processed images into one PDF
+    merge_images(all_processed_images, output_path)
+
     gc.collect()
+# if __name__ == '__main__':
+#     from sys import argv
+    
+#     if len(argv) == 2:
+#         run(port=int(argv[1]))
+#     else:
+#         run()
 def run(server_class=ThreadedHTTPServer, handler_class=SimpleHTTPRequestHandler, port=8000):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
