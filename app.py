@@ -142,7 +142,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"File is missing")
 
 from PyPDF2 import PdfFileReader, PdfFileWriter
-chunk_size = 200
+chunk_size = 50
 def split_pdf(filepath, chunk_size):
     pdf = PdfFileReader(filepath)
     total_pages = pdf.getNumPages()
@@ -177,8 +177,10 @@ def process_chunk(filepath):
         
         img_modified = Image.fromarray(data)
         processed_images.append(img_modified)
-    
+        del img, img_gray, img_inverted, data
+    gc.collect()
     return processed_images
+    
 
 def merge_images(images, output_path):
     images[0].save(output_path, save_all=True, append_images=images[1:])
@@ -194,18 +196,13 @@ def process_pdf_night_mode(filepath, output_path):
         processed_images = process_chunk(chunk_filepath)
         all_processed_images.extend(processed_images)
         print(f'Processed: {chunk_filepath}')
+        gc.collect()
 
     # Merge all processed images into one PDF
     merge_images(all_processed_images, output_path)
 
     gc.collect()
-# if __name__ == '__main__':
-#     from sys import argv
-    
-#     if len(argv) == 2:
-#         run(port=int(argv[1]))
-#     else:
-#         run()
+
 def run(server_class=ThreadedHTTPServer, handler_class=SimpleHTTPRequestHandler, port=8000):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
